@@ -1,3 +1,2 @@
-import { PostsList } from './PostsList.js';
-customElements.define('posts-list', PostsList);
+"use strict";
 //# sourceMappingURL=posts-list.js.map

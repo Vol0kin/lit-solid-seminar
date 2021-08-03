@@ -1,27 +1,49 @@
 import { __decorate } from "tslib";
 import { LitElement, html, css } from 'lit';
-import { property } from 'lit/decorators.js';
-import { openWcLogo } from './open-wc-logo.js';
-export class PostsList extends LitElement {
+import { customElement, property, state } from 'lit/decorators.js';
+import './CustomPost.js';
+let PostsList = class PostsList extends LitElement {
     constructor() {
         super(...arguments);
         this.title = 'My app';
+        this.posts = [];
+        this.searchTitle = '';
+    }
+    // connectedCallback is called when the component is added to the document's
+    // DOM. Its React equivalent would be componentDidMount
+    connectedCallback() {
+        super.connectedCallback();
+        (async () => {
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+            const data = await response.json();
+            this.posts = data;
+        })();
+    }
+    updateSearchTitle(event) {
+        this.searchTitle = event.target.value;
     }
     render() {
+        const filteredPosts = this.posts.filter(post => {
+            const { title } = post;
+            return title.includes(this.searchTitle.toLowerCase());
+        });
         return html `
       <main>
-        <div class="logo">${openWcLogo}</div>
         <h1>${this.title}</h1>
 
-        <p>Edit <code>src/PostsList.ts</code> and save to reload.</p>
-        <a
-          class="app-link"
-          href="https://open-wc.org/guides/developing-components/code-examples"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Code examples
-        </a>
+        <input
+          @input=${this.updateSearchTitle}
+          placeholder="Search by title..."
+        />
+
+        ${filteredPosts.map(post => {
+            const { body, id, title } = post;
+            return html ` <custom-post
+            key=${id}
+            title=${title}
+            body=${body}
+          ></custom-post>`;
+        })}
       </main>
 
       <p class="app-footer">
@@ -35,7 +57,7 @@ export class PostsList extends LitElement {
       </p>
     `;
     }
-}
+};
 PostsList.styles = css `
     :host {
       min-height: 100vh;
@@ -55,18 +77,14 @@ PostsList.styles = css `
       flex-grow: 1;
     }
 
-    .logo > svg {
-      margin-top: 36px;
-      animation: app-logo-spin infinite 20s linear;
-    }
-
-    @keyframes app-logo-spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
+    input {
+      border: 2px solid #1a2b42;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 20px;
+      margin-bottom: 50px;
+      width: 40vw;
+      text-align: center;
     }
 
     .app-footer {
@@ -77,8 +95,22 @@ PostsList.styles = css `
     .app-footer a {
       margin-left: 5px;
     }
+
+    custom-post {
+      margin: 0px 10px;
+    }
   `;
 __decorate([
     property({ type: String })
 ], PostsList.prototype, "title", void 0);
+__decorate([
+    state()
+], PostsList.prototype, "posts", void 0);
+__decorate([
+    state()
+], PostsList.prototype, "searchTitle", void 0);
+PostsList = __decorate([
+    customElement('posts-list')
+], PostsList);
+export { PostsList };
 //# sourceMappingURL=PostsList.js.map

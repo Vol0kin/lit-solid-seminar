@@ -1,9 +1,17 @@
 import { LitElement, html, css } from 'lit';
-import { property } from 'lit/decorators.js';
-import { openWcLogo } from './open-wc-logo.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
+import './CustomPost.js';
+
+@customElement('posts-list')
 export class PostsList extends LitElement {
   @property({ type: String }) title = 'My app';
+
+  @state()
+  posts = [];
+
+  @state()
+  searchTitle = '';
 
   static styles = css`
     :host {
@@ -24,18 +32,14 @@ export class PostsList extends LitElement {
       flex-grow: 1;
     }
 
-    .logo > svg {
-      margin-top: 36px;
-      animation: app-logo-spin infinite 20s linear;
-    }
-
-    @keyframes app-logo-spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
+    input {
+      border: 2px solid #1a2b42;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 20px;
+      margin-bottom: 50px;
+      width: 40vw;
+      text-align: center;
     }
 
     .app-footer {
@@ -46,23 +50,58 @@ export class PostsList extends LitElement {
     .app-footer a {
       margin-left: 5px;
     }
+
+    custom-post {
+      margin: 0px 10px;
+    }
   `;
 
+  // connectedCallback is called when the component is added to the document's
+  // DOM. Its React equivalent would be componentDidMount
+  connectedCallback() {
+    if (super.connectedCallback) {
+      super.connectedCallback();
+    }
+
+    (async () => {
+      const response = await fetch(
+        'https://jsonplaceholder.typicode.com/posts'
+      );
+      const data = await response.json();
+
+      this.posts = data;
+    })();
+  }
+
+  updateSearchTitle(event: Event) {
+    this.searchTitle = (event.target as HTMLInputElement).value;
+  }
+
   render() {
+    const filteredPosts = this.posts.filter(post => {
+      const { title } = post;
+
+      return (title as string).includes(this.searchTitle.toLowerCase());
+    });
+
     return html`
       <main>
-        <div class="logo">${openWcLogo}</div>
         <h1>${this.title}</h1>
 
-        <p>Edit <code>src/PostsList.ts</code> and save to reload.</p>
-        <a
-          class="app-link"
-          href="https://open-wc.org/guides/developing-components/code-examples"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Code examples
-        </a>
+        <input
+          @input=${this.updateSearchTitle}
+          placeholder="Search by title..."
+        />
+
+        ${filteredPosts.map(post => {
+          const { body, id, title } = post;
+
+          return html` <custom-post
+            key=${id}
+            title=${title}
+            body=${body}
+          ></custom-post>`;
+        })}
       </main>
 
       <p class="app-footer">
