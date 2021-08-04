@@ -1,14 +1,27 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+
+import _ from 'lodash-es';
 
 import './CustomPost.js';
 
+interface Post {
+  title: string;
+  body: string;
+  id: number;
+  userId: number;
+}
+
 @customElement('posts-list')
 export class PostsList extends LitElement {
-  @property({ type: String }) title = 'My app';
+  @property({ type: String })
+  title = 'My app';
 
   @state()
-  posts = [];
+  posts: Post[] = [];
+
+  @state()
+  filteredPosts: Post[] = [];
 
   @state()
   searchTitle = '';
@@ -42,26 +55,16 @@ export class PostsList extends LitElement {
       text-align: center;
     }
 
-    .app-footer {
-      font-size: calc(12px + 0.5vmin);
-      align-items: center;
-    }
-
-    .app-footer a {
-      margin-left: 5px;
-    }
-
     custom-post {
-      margin: 0px 10px;
+      margin: 20px 0px;
     }
   `;
 
   // connectedCallback is called when the component is added to the document's
   // DOM. Its React equivalent would be componentDidMount
   connectedCallback() {
-    if (super.connectedCallback) {
-      super.connectedCallback();
-    }
+    // eslint-disable-next-line wc/guard-super-call
+    super.connectedCallback();
 
     (async () => {
       const response = await fetch(
@@ -70,49 +73,52 @@ export class PostsList extends LitElement {
       const data = await response.json();
 
       this.posts = data;
+      this.filteredPosts = data;
     })();
   }
 
-  updateSearchTitle(event: Event) {
-    this.searchTitle = (event.target as HTMLInputElement).value;
+  willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('searchTitle')) {
+      this._filterPosts();
+    }
   }
 
+  private _updateSearchTitle = (e: Event) => {
+    const newSearchTitle = (e.target as HTMLInputElement).value;
+    this.searchTitle = newSearchTitle;
+  };
+
+  private _filterPosts = _.debounce(() => {
+    this.filteredPosts = this.posts.filter(post =>
+      post.title.includes(this.searchTitle.toLowerCase())
+    );
+  }, 500);
+
   render() {
-    const filteredPosts = this.posts.filter(post => {
-      const { title } = post;
-
-      return (title as string).includes(this.searchTitle.toLowerCase());
-    });
-
     return html`
       <main>
         <h1>${this.title}</h1>
 
         <input
-          @input=${this.updateSearchTitle}
+          type="text"
+          @input=${this._updateSearchTitle}
           placeholder="Search by title..."
         />
 
-        ${filteredPosts.map(post => {
-          const { body, id, title } = post;
-
-          return html` <custom-post
-            key=${id}
-            title=${title}
-            body=${body}
-          ></custom-post>`;
-        })}
+        ${this.filteredPosts.length !== this.posts.length
+          ? html`<p>
+              Showing ${this.filteredPosts.length} out of ${this.posts.length}
+              posts
+            </p>`
+          : html`<p></p>`}
+        ${this.filteredPosts.map(
+          post =>
+            html` <custom-post
+              title=${post.title}
+              body=${post.body}
+            ></custom-post>`
+        )}
       </main>
-
-      <p class="app-footer">
-        🚽 Made with love by
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://github.com/open-wc"
-          >open-wc</a
-        >.
-      </p>
     `;
   }
 }

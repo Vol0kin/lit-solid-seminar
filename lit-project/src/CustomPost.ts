@@ -10,6 +10,9 @@ export class CustomPost extends LitElement {
   body = '';
 
   static styles = css`
+    :host {
+      display: block;
+    }
     div {
       background-color: #fefefe;
       padding: 20px 10px;

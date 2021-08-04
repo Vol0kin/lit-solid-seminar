@@ -11,7 +11,8 @@
     "lint-staged": "^10.5.4",
     "prettier": "^2.2.1",
     "tslib": "^2.3.0",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "@types/lodash-es": "^4.14.172"
   },
   "scripts": {
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
@@ -24,7 +25,8 @@
   "author": "posts-list",
   "license": "MIT",
   "dependencies": {
-    "lit": "^2.0.0-rc.2"
+    "lit": "^2.0.0-rc.2",
+    "lodash-es": "^4.17.21"
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
