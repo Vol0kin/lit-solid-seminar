@@ -18,13 +18,13 @@ export class PostsList extends LitElement {
   title = 'My app';
 
   @state()
-  posts: Post[] = [];
+  private _posts: Post[] = [];
 
   @state()
-  filteredPosts: Post[] = [];
+  private _filteredPosts: Post[] = [];
 
   @state()
-  searchTitle = '';
+  private _searchTitle = '';
 
   static styles = css`
     :host {
@@ -72,8 +72,8 @@ export class PostsList extends LitElement {
       );
       const data = await response.json();
 
-      this.posts = data;
-      this.filteredPosts = data;
+      this._posts = data;
+      this._filteredPosts = data;
     })();
   }
 
@@ -85,12 +85,12 @@ export class PostsList extends LitElement {
 
   private _updateSearchTitle = (e: Event) => {
     const newSearchTitle = (e.target as HTMLInputElement).value;
-    this.searchTitle = newSearchTitle;
+    this._searchTitle = newSearchTitle;
   };
 
   private _filterPosts = _.debounce(() => {
-    this.filteredPosts = this.posts.filter(post =>
-      post.title.includes(this.searchTitle.toLowerCase())
+    this._filteredPosts = this._posts.filter(post =>
+      post.title.includes(this._searchTitle.toLowerCase())
     );
   }, 500);
 
@@ -105,13 +105,13 @@ export class PostsList extends LitElement {
           placeholder="Search by title..."
         />
 
-        ${this.filteredPosts.length !== this.posts.length
+        ${this._filteredPosts.length !== this._posts.length
           ? html`<p>
-              Showing ${this.filteredPosts.length} out of ${this.posts.length}
+              Showing ${this._filteredPosts.length} out of ${this._posts.length}
               posts
             </p>`
           : html`<p></p>`}
-        ${this.filteredPosts.map(
+        ${this._filteredPosts.map(
           post =>
             html` <custom-post
               title=${post.title}
