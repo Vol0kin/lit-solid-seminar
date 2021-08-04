@@ -1,0 +1,15 @@
+.App {
+  text-align: center;
+  background-color: #ededed;
+  border: solid 1px transparent;
+}
+
+.input{
+  border: 2px solid #1a2b42;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 20px;
+  margin-bottom: 50px;
+  width: 40vw;
+  text-align: center;
+}
