@@ -78,7 +78,7 @@ export class PostsList extends LitElement {
   }
 
   willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('searchTitle')) {
+    if (changedProperties.has('_searchTitle')) {
       this._filterPosts();
     }
   }
